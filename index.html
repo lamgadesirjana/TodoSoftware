@@ -48,6 +48,7 @@
   <div class="input-group mb-4">
     <input type="text" id="taskInput" class="form-control" placeholder="Enter a new task" />
     <button class="btn btn-primary" id="addTaskBtn">Add Task</button>
+    <button class="btn btn-danger" id="deleteAllBtn">Delete All</button>
   </div>
   <div id="taskList"></div>
 </div>
@@ -55,6 +56,7 @@
 <script>
   const taskInput = document.getElementById("taskInput");
   const addTaskBtn = document.getElementById("addTaskBtn");
+  const deleteAllBtn = document.getElementById("deleteAllBtn");
   const taskList = document.getElementById("taskList");
 
   document.addEventListener("DOMContentLoaded", loadTasks);
@@ -63,6 +65,13 @@
     if (taskText !== "") {
       createTask(taskText);
       taskInput.value = "";
+    }
+  });
+
+  deleteAllBtn.addEventListener("click", () => {
+    if (confirm("Are you sure you want to delete all tasks?")) {
+      localStorage.removeItem("tasks");
+      renderTasks();
     }
   });
 
@@ -79,7 +88,7 @@
     tasks.forEach((task, index) => {
       const taskItem = document.createElement("div");
       taskItem.className = "task-item d-flex" + (task.completed ? " completed" : "");
-      
+
       const taskText = document.createElement("span");
       taskText.textContent = task.text;
       taskText.className = "me-auto";
@@ -123,17 +132,21 @@
     const tasks = getTasks();
     const newTask = prompt("Edit your task:", tasks[index].text);
     if (newTask !== null && newTask.trim() !== "") {
-      tasks[index].text = newTask.trim();
-      localStorage.setItem("tasks", JSON.stringify(tasks));
-      renderTasks();
+      if (confirm("Are you sure you want to update this task?")) {
+        tasks[index].text = newTask.trim();
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+        renderTasks();
+      }
     }
   }
 
   function deleteTask(index) {
-    const tasks = getTasks();
-    tasks.splice(index, 1);
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-    renderTasks();
+    if (confirm("Are you sure you want to delete this task?")) {
+      const tasks = getTasks();
+      tasks.splice(index, 1);
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+      renderTasks();
+    }
   }
 
   function getTasks() {
