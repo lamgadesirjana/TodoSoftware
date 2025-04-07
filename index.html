@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>To-Do App</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      padding-top: 50px;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .container {
+      max-width: 700px;
+      background-color: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .task-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background-color: #ffffff;
+      border: 1px solid #dee2e6;
+      border-radius: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .task-item.completed span {
+      text-decoration: line-through;
+      color: #6c757d;
+    }
+    .task-actions button {
+      margin-left: 0.25rem;
+    }
+    .task-text-input {
+      flex: 1;
+      margin-right: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2 class="text-center mb-4">📝 My To-Do List</h2>
+  <div class="input-group mb-4">
+    <input type="text" id="taskInput" class="form-control" placeholder="Enter a new task" />
+    <button class="btn btn-primary" id="addTaskBtn">Add Task</button>
+  </div>
+  <div id="taskList"></div>
+</div>
+
+<script>
+  const taskInput = document.getElementById("taskInput");
+  const addTaskBtn = document.getElementById("addTaskBtn");
+  const taskList = document.getElementById("taskList");
+
+  document.addEventListener("DOMContentLoaded", loadTasks);
+  addTaskBtn.addEventListener("click", () => {
+    const taskText = taskInput.value.trim();
+    if (taskText !== "") {
+      createTask(taskText);
+      taskInput.value = "";
+    }
+  });
+
+  function createTask(text, completed = false) {
+    const tasks = getTasks();
+    tasks.push({ text, completed });
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    renderTasks();
+  }
+
+  function renderTasks() {
+    taskList.innerHTML = "";
+    const tasks = getTasks();
+    tasks.forEach((task, index) => {
+      const taskItem = document.createElement("div");
+      taskItem.className = "task-item d-flex" + (task.completed ? " completed" : "");
+      
+      const taskText = document.createElement("span");
+      taskText.textContent = task.text;
+      taskText.className = "me-auto";
+
+      const actions = document.createElement("div");
+      actions.className = "task-actions";
+
+      const completeBtn = document.createElement("button");
+      completeBtn.className = "btn btn-sm btn-success";
+      completeBtn.textContent = "✓";
+      completeBtn.onclick = () => toggleComplete(index);
+
+      const editBtn = document.createElement("button");
+      editBtn.className = "btn btn-sm btn-warning";
+      editBtn.textContent = "✎";
+      editBtn.onclick = () => editTask(index);
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "btn btn-sm btn-danger";
+      deleteBtn.textContent = "✕";
+      deleteBtn.onclick = () => deleteTask(index);
+
+      actions.appendChild(completeBtn);
+      actions.appendChild(editBtn);
+      actions.appendChild(deleteBtn);
+
+      taskItem.appendChild(taskText);
+      taskItem.appendChild(actions);
+      taskList.appendChild(taskItem);
+    });
+  }
+
+  function toggleComplete(index) {
+    const tasks = getTasks();
+    tasks[index].completed = !tasks[index].completed;
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    renderTasks();
+  }
+
+  function editTask(index) {
+    const tasks = getTasks();
+    const newTask = prompt("Edit your task:", tasks[index].text);
+    if (newTask !== null && newTask.trim() !== "") {
+      tasks[index].text = newTask.trim();
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+      renderTasks();
+    }
+  }
+
+  function deleteTask(index) {
+    const tasks = getTasks();
+    tasks.splice(index, 1);
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    renderTasks();
+  }
+
+  function getTasks() {
+    return JSON.parse(localStorage.getItem("tasks")) || [];
+  }
+
+  function loadTasks() {
+    renderTasks();
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
